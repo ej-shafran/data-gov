@@ -1,0 +1,104 @@
+#!/usr/bin/env node
+
+const https = require("https");
+const fs = require("fs");
+
+function main(data) {
+  try {
+    const results = JSON.parse(data);
+
+    const links = results.result.map(
+      (item) => `https://data.gov.il/dataset/${item}`
+    );
+
+    writeTxtResults(links);
+    writeHtmlResults(links);
+    writeJsonResults(links);
+    writeCsvResults(links);
+  } catch (error) {
+    console.error(
+      `${redBold("Error")} parsing data from the ${blueBold(
+        "data.gov.il"
+      )} API:`
+    );
+    console.error(error.message);
+  }
+}
+
+https.get("https://data.gov.il/api/action/package_list", (res) => {
+  let data = "";
+  let initialData = true;
+
+  res.on("data", (chunk) => {
+    if (initialData) {
+      console.log(`Fetching from ${blueBold("data.gov.il")}...`);
+      initialData = false;
+    }
+
+    data += chunk;
+  });
+
+  res.on("error", (error) => {
+    console.error(
+      `${redBold("Error")} fetching data from the ${blueBold(
+        "data.gov.il"
+      )} API:`
+    );
+    console.error(error.message);
+  });
+
+  res.on("end", () => {
+    main(data);
+  });
+});
+
+function writeTxtResults(links) {
+  const txtResults = links.reduce((acc, cur) => acc + cur + "\n", "");
+  fs.writeFileSync("results.txt", txtResults);
+}
+
+function writeHtmlResults(links) {
+  const anchorTags = links.reduce(
+    (acc, cur) =>
+      acc +
+      `
+      <li>
+        <a href="https://data.gov.il/dataset/${cur}">
+          https://data.gov.il/dataset/${cur}
+        </a>
+      </li>`,
+    ""
+  );
+  const htmlResults = `<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>קישורים לכל מאגרי הנתונים</title>
+  </head>
+  <body>
+    <h1>קישורים לכל מאגרי הנתונים של <code>data.gov.il</code></h1>
+    <ul>${anchorTags}
+    </ul>
+  </body>
+</html>`;
+
+  fs.writeFileSync("results.html", htmlResults);
+}
+
+function writeJsonResults(links) {
+  fs.writeFileSync("results.json", JSON.stringify(links, null, 2));
+}
+
+function writeCsvResults(links) {
+  fs.writeFileSync("results.csv", links.join(","));
+}
+
+function redBold(str) {
+  return `\x1b[1;31m${str}\x1b[0m`;
+}
+
+function blueBold(str) {
+  return `\x1b[1;34m${str}\x1b[0m`;
+}
