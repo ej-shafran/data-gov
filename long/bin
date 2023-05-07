@@ -43,8 +43,10 @@ var __async = (__this, __arguments, generator) => {
   });
 };
 
-// src/longscrape.ts
+// src/index.ts
 var import_yargs = __toESM(require("yargs/yargs"));
+
+// src/longscrape.ts
 var import_chalk5 = __toESM(require("chalk"));
 var import_puppeteer = __toESM(require("puppeteer"));
 
@@ -153,6 +155,8 @@ function longFetch(url, screenshot) {
     return process.exit(0);
   });
 }
+
+// src/index.ts
 var argv = (0, import_yargs.default)(process.argv.slice(2)).option("u", {
   alias: "url",
   demandOption: true,

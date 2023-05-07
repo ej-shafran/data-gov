@@ -7,7 +7,7 @@ import { getDescription } from "./getDescription";
 import { getUpdateRate } from "./getUpdateRate";
 import { getUpdateMethod } from "./getUpdateMethod";
 
-export async function longFetch(url: string, screenshot?: boolean) {
+export async function longFetch(url: string) {
   console.log(`Loading new ${chalk.green("puppeteer")} instance...`);
   const browser = await puppeteer.launch({ headless: "new" });
 
@@ -20,10 +20,10 @@ export async function longFetch(url: string, screenshot?: boolean) {
   console.log(`Visiting ${chalk.blue(url)}...`);
   await page.goto(url, { waitUntil: "networkidle0" });
 
-  if (screenshot) {
-    console.log(`Taking a screenshot...`);
-    await page.screenshot({ path: "temp.png" });
-  }
+  // if (screenshot) {
+  //   console.log(`Taking a screenshot...`);
+  //   await page.screenshot({ path: "temp.png" });
+  // }
 
   const name = await getHeaderText(page);
   console.log(`Name: ${chalk.green(name)}`);
