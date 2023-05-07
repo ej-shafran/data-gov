@@ -1,6 +1,3 @@
-#!/usr/bin/env node
-
-import yargs from "yargs/yargs";
 import chalk from "chalk";
 import puppeteer from "puppeteer";
 
@@ -10,7 +7,7 @@ import { getDescription } from "./getDescription";
 import { getUpdateRate } from "./getUpdateRate";
 import { getUpdateMethod } from "./getUpdateMethod";
 
-async function longFetch(url: string, screenshot?: boolean) {
+export async function longFetch(url: string, screenshot?: boolean) {
   console.log(`Loading new ${chalk.green("puppeteer")} instance...`);
   const browser = await puppeteer.launch({ headless: "new" });
 
@@ -45,20 +42,3 @@ async function longFetch(url: string, screenshot?: boolean) {
 
   return process.exit(0);
 }
-
-const argv = yargs(process.argv.slice(2))
-  .option("u", {
-    alias: "url",
-    demandOption: true,
-    type: "string",
-    desc: "URL to scrape the data from.",
-  })
-  .option("s", {
-    alias: "screenshot",
-    type: "boolean",
-    desc: "Whether to take a screenshot of the page.",
-    default: false,
-  })
-  .parseSync();
-
-longFetch(argv.u, argv.s);
