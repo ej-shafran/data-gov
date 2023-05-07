@@ -2,6 +2,7 @@ import chalk from "chalk";
 import puppeteer from "puppeteer";
 import { extract } from "./extract";
 import { input } from "./input";
+import { exec } from "./exec";
 
 export async function longFetch(url: string) {
   console.log(`Loading new ${chalk.green("puppeteer")} instance...`);
@@ -24,7 +25,8 @@ export async function longFetch(url: string) {
   console.log();
   const data = await extract(browser, page);
 
-  // start prompting here!
+  await exec(`google-chrome ${url}`);
+
   console.log();
   await input(data);
 
