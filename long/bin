@@ -357,16 +357,17 @@ function inputAnswers() {
         )}? (Be sure to check the actual files)`,
         name: "latestUpdate",
         validate(input2) {
-          return !!input2 || "REQUIRED";
+          if (!input2)
+            return "REQUIRED";
+          if (isNaN(new Date(input2).getTime()))
+            return "MUST BE A VALID DATE";
+          return true;
         }
       },
       {
         type: "input",
         message: `What is the ${import_chalk6.default.yellow("relevant year range")}?`,
-        name: "yearRangeForComparison",
-        validate(input2) {
-          return !!input2 || "REQUIRED";
-        }
+        name: "yearRangeForComparison"
       },
       {
         type: "confirm",
@@ -378,10 +379,11 @@ function inputAnswers() {
         message: "Additional notes:",
         name: "notes"
       }
-    ]), { useful, areasOfFocus } = _a, answers = __objRest(_a, ["useful", "areasOfFocus"]);
+    ]), { useful, areasOfFocus, yearRangeForComparison } = _a, answers = __objRest(_a, ["useful", "areasOfFocus", "yearRangeForComparison"]);
     return __spreadValues({
       useful: useful ? "\u05E9\u05D9\u05DE\u05D5\u05E9\u05D9" : "\u05DC\u05D0 \u05E9\u05D9\u05DE\u05D5\u05E9\u05D9",
-      areasOfFocus: areasOfFocus.join(",")
+      areasOfFocus: areasOfFocus.join(","),
+      yearRangeForComparison: yearRangeForComparison || "\u05D0\u05D9\u05DF \u05DE\u05D9\u05D3\u05E2 \u05D4\u05D9\u05E1\u05D8\u05D5\u05E8\u05D9"
     }, answers);
   });
 }
@@ -500,16 +502,18 @@ function longScrape(url, priorName) {
       if (!confirmation)
         console.clear();
     }
+    console.clear();
     console.log(`Outputing result to ${import_chalk8.default.grey("output.csv")}...`);
     console.log();
     yield fs.appendFile(
       "output.csv",
       `${results.url},${results.org},${results.name},"${results.description}",${results.resourceCount},${results.latestUpdate},${results.updateRate},${results.updateMethod},${results.yearRangeForComparison},${results.hasAPI},"${results.formats}","${results.areasOfFocus}",${results.useful},${results.notes},${name}`.split("\n").join("	") + "\n"
     );
-    yield delay(1);
+    yield delay(2);
     console.log(`Closing ${import_chalk8.default.green("puppeteer")} instance...`);
     console.log();
     yield browser.close();
+    yield delay(1);
   });
 }
 

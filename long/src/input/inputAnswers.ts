@@ -15,46 +15,49 @@ type RawInput = Omit<UserInput, "useful" | "areasOfFocus"> & {
 };
 
 export async function inputAnswers(): Promise<UserInput> {
-  const { useful, areasOfFocus, ...answers }: RawInput = await inquirer.prompt([
-    {
-      type: "checkbox",
-      choices: ["חינוך", "תעסוקה", "יוקר המחיה", "איכות הסביבה"],
-      name: "areasOfFocus",
-      message: `Which of these ${chalk.yellow("areas of focus")} apply?`,
-    },
-    {
-      type: "input",
-      message: `What is the ${chalk.yellow(
-        "latest update"
-      )}? (Be sure to check the actual files)`,
-      name: "latestUpdate",
-      validate(input) {
-        return !!input || "REQUIRED";
+  const { useful, areasOfFocus, yearRangeForComparison, ...answers }: RawInput =
+    await inquirer.prompt([
+      {
+        type: "checkbox",
+        choices: ["חינוך", "תעסוקה", "יוקר המחיה", "איכות הסביבה"],
+        name: "areasOfFocus",
+        message: `Which of these ${chalk.yellow("areas of focus")} apply?`,
       },
-    },
-    {
-      type: "input",
-      message: `What is the ${chalk.yellow("relevant year range")}?`,
-      name: "yearRangeForComparison",
-      validate(input) {
-        return !!input || "REQUIRED";
+      {
+        type: "input",
+        message: `What is the ${chalk.yellow(
+          "latest update"
+        )}? (Be sure to check the actual files)`,
+        name: "latestUpdate",
+        validate(input) {
+          if (!input) return "REQUIRED";
+
+          if (isNaN(new Date(input).getTime())) return "MUST BE A VALID DATE";
+
+          return true;
+        },
       },
-    },
-    {
-      type: "confirm",
-      message: `Is this dataset ${chalk.yellow("useful")}?`,
-      name: "useful",
-    },
-    {
-      type: "input",
-      message: "Additional notes:",
-      name: "notes",
-    },
-  ]);
+      {
+        type: "input",
+        message: `What is the ${chalk.yellow("relevant year range")}?`,
+        name: "yearRangeForComparison",
+      },
+      {
+        type: "confirm",
+        message: `Is this dataset ${chalk.yellow("useful")}?`,
+        name: "useful",
+      },
+      {
+        type: "input",
+        message: "Additional notes:",
+        name: "notes",
+      },
+    ]);
 
   return {
     useful: useful ? "שימושי" : "לא שימושי",
     areasOfFocus: areasOfFocus.join(","),
+    yearRangeForComparison: yearRangeForComparison || "אין מידע היסטורי",
     ...answers,
   };
 }
