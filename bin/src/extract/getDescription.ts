@@ -1,7 +1,8 @@
+import chalk from "chalk";
 import { Page } from "puppeteer";
 
 export async function getDescription(page: Page) {
-  console.log("Getting description...");
+  console.log(chalk.bold("Getting description..."));
 
   const desc = await page.$eval(
     ".notes.embedded-content",

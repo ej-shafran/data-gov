@@ -1,4 +1,4 @@
-import { Browser, Page } from "puppeteer";
+import { Page } from "puppeteer";
 import { getOrg } from "./getOrg";
 import { getHeaderText } from "./getHeaderText";
 import { getDescription } from "./getDescription";

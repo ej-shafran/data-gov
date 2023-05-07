@@ -15,29 +15,35 @@ export async function longScrape(url: string, priorName?: string) {
 
   const name = priorName ?? (await askForName());
 
-  console.log(`Loading new ${chalk.green("puppeteer")} instance...`);
+  console.log(
+    chalk.bold(`Loading new ${chalk.green("puppeteer")} instance...`)
+  );
   console.log();
   const browser = await puppeteer.launch({ headless: "new" });
 
-  console.log(`Opening new page...`);
+  console.log(chalk.bold(`Opening new page...`));
   console.log();
   const page = await browser.newPage();
 
-  console.log(`Setting ${chalk.yellow("User-Agent")} header...`);
+  console.log(chalk.bold(`Setting ${chalk.yellow("User-Agent")} header...`));
   console.log();
   await page.setUserAgent("datagov-external-client");
 
-  console.log(`Visiting ${chalk.blue(url)}...`);
+  console.log(chalk.bold(`Visiting ${chalk.blue(url)}...`));
   console.log();
   await page.goto(url, { waitUntil: "networkidle0" });
 
-  console.log(`Extracting all easily readable data from ${chalk.blue(url)}...`);
+  console.log(
+    chalk.bold(`Extracting all easily readable data from ${chalk.blue(url)}...`)
+  );
   console.log();
   const data = await extract(page);
   console.log();
 
   console.log(
-    `Opening ${chalk.blue(url)} in ${chalk.green("Google Chrome")}...`
+    chalk.bold(
+      `Opening ${chalk.blue(url)} in ${chalk.green("Google Chrome")}...`
+    )
   );
   await delay(2);
   await exec(`google-chrome ${url}`);
@@ -57,7 +63,7 @@ export async function longScrape(url: string, priorName?: string) {
 
   // do stuff with results
   console.clear();
-  console.log(`Outputing result to ${chalk.grey("output.csv")}...`);
+  console.log(chalk.bold(`Outputing result to ${chalk.grey("output.csv")}...`));
   console.log();
   await fs.appendFile(
     "output.csv",
@@ -71,7 +77,7 @@ export async function longScrape(url: string, priorName?: string) {
   );
   await delay(2);
 
-  console.log(`Closing ${chalk.green("puppeteer")} instance...`);
+  console.log(chalk.bold(`Closing ${chalk.green("puppeteer")} instance...`));
   console.log();
   await browser.close();
 

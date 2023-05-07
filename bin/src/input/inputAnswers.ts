@@ -32,7 +32,10 @@ export async function inputAnswers(): Promise<UserInput> {
         validate(input) {
           if (!input) return "REQUIRED";
 
-          if (isNaN(new Date(input).getTime())) return "MUST BE A VALID DATE";
+          const isDate =
+            /(0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[012])\.[0-9]{4}/.test(input);
+
+          if (!isDate) return "MUST BE A DATE IN THE FORM DD.MM.YYYY";
 
           return true;
         },

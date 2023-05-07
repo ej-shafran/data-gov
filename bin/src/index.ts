@@ -21,6 +21,8 @@ async function main() {
     try {
       const raw = fs.readFileSync("links.txt", "utf-8");
 
+      if (!raw.trim()) throw new Error();
+
       const name = await askForName();
       console.log();
 

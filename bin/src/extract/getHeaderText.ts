@@ -2,7 +2,7 @@ import { Page } from "puppeteer";
 import chalk from "chalk";
 
 export async function getHeaderText(page: Page) {
-  console.log("Getting header text:");
+  console.log(chalk.bold("Getting header text:"));
 
   const h1 = await page.$eval("h1", (el) => el.textContent);
 

@@ -2,7 +2,7 @@ import { Page } from "puppeteer";
 import chalk from "chalk";
 
 export async function getUpdateRate(page: Page) {
-  console.log("Getting update rate...");
+  console.log(chalk.bold("Getting update rate..."));
 
   const text = await page.$eval(
     "tbody tr:nth-child(3) td.dataset-details",

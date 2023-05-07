@@ -2,7 +2,7 @@ import { Page } from "puppeteer";
 import chalk from "chalk";
 
 export async function getOrg(page: Page) {
-  console.log("Getting originization...");
+  console.log(chalk.bold("Getting originization..."));
 
   const org = await page.$eval(
     ".breadcrumb li:nth-child(2) a",

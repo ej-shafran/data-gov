@@ -1,7 +1,8 @@
+import chalk from "chalk";
 import { Page } from "puppeteer";
 
 export async function getFormats(page: Page) {
-  console.log("Getting formats...");
+  console.log(chalk.bold("Getting formats..."));
 
   const formats = await page.$$eval("[data-format]", (els) =>
     els.map((el) => el.getAttribute("data-format"))

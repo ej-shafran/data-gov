@@ -1,7 +1,8 @@
+import chalk from "chalk";
 import { Page } from "puppeteer";
 
 export async function getHasApi(page: Page) {
-  console.log("Checking whether there's an API...");
+  console.log(chalk.bold("Checking whether there's an API..."));
 
   const formats = await page.$$eval("[data-format]", (els) =>
     els.map((el) => el.getAttribute("data-format"))
