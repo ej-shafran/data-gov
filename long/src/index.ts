@@ -24,7 +24,7 @@ async function main() {
       const name = await askForName();
       console.log();
 
-      for (let line of raw.split("\n")) {
+      for (let line of raw.split("\n").filter(Boolean)) {
         console.log("Starting process for " + chalk.blue(line));
         await longScrape(line, name);
         console.clear();

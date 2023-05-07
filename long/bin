@@ -76,7 +76,7 @@ var __async = (__this, __arguments, generator) => {
 var import_yargs = __toESM(require("yargs/yargs"));
 
 // src/longscrape.ts
-var import_chalk9 = __toESM(require("chalk"));
+var import_chalk8 = __toESM(require("chalk"));
 var import_puppeteer = __toESM(require("puppeteer"));
 
 // src/extract/getOrg.ts
@@ -175,44 +175,34 @@ function getUpdateRate(page) {
 function getFormats(page) {
   return __async(this, null, function* () {
     console.log("Getting formats...");
-    const formatSet = /* @__PURE__ */ new Set();
     const formats = yield page.$$eval(
       "[data-format]",
       (els) => els.map((el) => el.getAttribute("data-format"))
     );
-    for (let format of formats) {
-      if (format)
-        formatSet.add(format);
-    }
+    const formatSet = new Set(
+      formats.filter((format) => !!format)
+    );
     return [...formatSet].join(",");
   });
 }
 
 // src/extract/getApi.ts
-var import_chalk5 = __toESM(require("chalk"));
-function getHasApi(browser, page) {
+function getHasApi(page) {
   return __async(this, null, function* () {
     console.log("Checking whether there's an API...");
-    const href = yield page.$eval(
-      ".resource-item a.btn",
-      (el) => el.getAttribute("href")
+    const formats = yield page.$$eval(
+      "[data-format]",
+      (els) => els.map((el) => el.getAttribute("data-format"))
     );
-    if (!href) {
-      console.error(import_chalk5.default.redBright("Could not find Eye icon in page."));
-      return process.exit(1);
-    }
-    const newPage = yield browser.newPage();
-    yield newPage.setUserAgent("datagov-external-client");
-    yield newPage.goto(`https://data.gov.il/${href}`, {
-      waitUntil: "networkidle0"
-    });
-    const apiBtn = yield newPage.$('[data-module="gov-api-info"]');
-    return !!apiBtn ? "\u05D9\u05E9" : "\u05D0\u05D9\u05DF";
+    const hasApi = formats.some(
+      (format) => format && ["xls", "xlsx", "csv"].includes(format.toLowerCase())
+    );
+    return !!hasApi ? "\u05D9\u05E9" : "\u05D0\u05D9\u05DF";
   });
 }
 
 // src/extract/index.ts
-function extract(browser, page) {
+function extract(page) {
   return __async(this, null, function* () {
     const [
       url,
@@ -233,7 +223,7 @@ function extract(browser, page) {
       getUpdateMethod(page),
       getUpdateRate(page),
       getFormats(page),
-      getHasApi(browser, page)
+      getHasApi(page)
     ]);
     return {
       url,
@@ -250,7 +240,7 @@ function extract(browser, page) {
 }
 
 // src/input/confirmAnswers.ts
-var import_chalk6 = __toESM(require("chalk"));
+var import_chalk5 = __toESM(require("chalk"));
 var import_inquirer = __toESM(require("inquirer"));
 var ResultToMessage = {
   name: "dataset name",
@@ -258,54 +248,62 @@ var ResultToMessage = {
   description: "description",
   updateRate: "update rate",
   updateMethod: "update method",
-  formats: "list of resource formats"
+  formats: "list of resource formats",
+  resourceCount: "resource count"
 };
 function confirmAnswers(results) {
   return __async(this, null, function* () {
     const confirmAnswers2 = yield import_inquirer.default.prompt([
       {
         type: "confirm",
-        message: `Is ${import_chalk6.default.blue(results.name)} the correct ${import_chalk6.default.yellow(
+        message: `Is ${import_chalk5.default.blue(results.name)} the correct ${import_chalk5.default.yellow(
           ResultToMessage.name
         )}?`,
         name: "name"
       },
       {
         type: "confirm",
-        message: `Is ${import_chalk6.default.blue(results.org)} the correct ${import_chalk6.default.yellow(
+        message: `Is ${import_chalk5.default.blue(results.org)} the correct ${import_chalk5.default.yellow(
           ResultToMessage.org
         )}?`,
         name: "org"
       },
       {
         type: "confirm",
-        message: `Is ${import_chalk6.default.blue(results.description)} the correct ${ResultToMessage.description}?`,
+        message: `Is ${import_chalk5.default.blue(results.description)} the correct ${ResultToMessage.description}?`,
         name: "description"
       },
       {
         type: "confirm",
-        message: `Is ${import_chalk6.default.blue(results.updateRate)} the correct ${import_chalk6.default.yellow(
+        message: `Is the ${import_chalk5.default.yellow(
+          ResultToMessage.resourceCount
+        )} ${import_chalk5.default.blue(results.resourceCount)}?`,
+        name: "resourceCount"
+      },
+      {
+        type: "confirm",
+        message: `Is ${import_chalk5.default.blue(results.updateRate)} the correct ${import_chalk5.default.yellow(
           ResultToMessage.updateRate
         )}?`,
         name: "updateRate"
       },
       {
         type: "confirm",
-        message: `Is ${import_chalk6.default.blue(
+        message: `Is ${import_chalk5.default.blue(
           results.updateMethod
-        )} the correct ${import_chalk6.default.yellow(ResultToMessage.updateMethod)}?`,
+        )} the correct ${import_chalk5.default.yellow(ResultToMessage.updateMethod)}?`,
         name: "updateMethod"
       },
       {
         type: "confirm",
-        message: `Is "${import_chalk6.default.blue(results.formats)}" the correct ${import_chalk6.default.yellow(
+        message: `Is "${import_chalk5.default.blue(results.formats)}" the correct ${import_chalk5.default.yellow(
           ResultToMessage.formats
         )}?`,
         name: "formats"
       },
       {
         type: "confirm",
-        message: `Is ${import_chalk6.default.blue(
+        message: `Is ${import_chalk5.default.blue(
           results.hasAPI
         )} the correct answer to "Has API?"`,
         name: "hasAPI"
@@ -322,7 +320,7 @@ function confirmAnswers(results) {
         questions.push({
           type: "input",
           name: key,
-          message: `Please enter the ${import_chalk6.default.yellow(
+          message: `Please enter the ${import_chalk5.default.yellow(
             ResultToMessage[key]
           )}:`,
           validate(input2) {
@@ -338,7 +336,7 @@ function confirmAnswers(results) {
 }
 
 // src/input/inputAnswers.ts
-var import_chalk7 = __toESM(require("chalk"));
+var import_chalk6 = __toESM(require("chalk"));
 var import_inquirer2 = __toESM(require("inquirer"));
 function inputAnswers() {
   return __async(this, null, function* () {
@@ -347,11 +345,11 @@ function inputAnswers() {
         type: "checkbox",
         choices: ["\u05D7\u05D9\u05E0\u05D5\u05DA", "\u05EA\u05E2\u05E1\u05D5\u05E7\u05D4", "\u05D9\u05D5\u05E7\u05E8 \u05D4\u05DE\u05D7\u05D9\u05D4", "\u05D0\u05D9\u05DB\u05D5\u05EA \u05D4\u05E1\u05D1\u05D9\u05D1\u05D4"],
         name: "areasOfFocus",
-        message: `Which of these ${import_chalk7.default.yellow("areas of focus")} apply?`
+        message: `Which of these ${import_chalk6.default.yellow("areas of focus")} apply?`
       },
       {
         type: "input",
-        message: `What is the ${import_chalk7.default.yellow(
+        message: `What is the ${import_chalk6.default.yellow(
           "latest update"
         )}? (Be sure to check the actual files)`,
         name: "latestUpdate",
@@ -361,7 +359,7 @@ function inputAnswers() {
       },
       {
         type: "input",
-        message: `What is the ${import_chalk7.default.yellow("relevant year range")}?`,
+        message: `What is the ${import_chalk6.default.yellow("relevant year range")}?`,
         name: "yearRangeForComparison",
         validate(input2) {
           return !!input2 || "REQUIRED";
@@ -369,7 +367,7 @@ function inputAnswers() {
       },
       {
         type: "confirm",
-        message: `Is this dataset ${import_chalk7.default.yellow("useful")}?`,
+        message: `Is this dataset ${import_chalk6.default.yellow("useful")}?`,
         name: "useful"
       },
       {
@@ -403,7 +401,7 @@ var exec = (0, import_util.promisify)(import_child_process.exec);
 
 // src/input/reconfirm.ts
 var import_as_table = __toESM(require("as-table"));
-var import_chalk8 = __toESM(require("chalk"));
+var import_chalk7 = __toESM(require("chalk"));
 var import_inquirer3 = __toESM(require("inquirer"));
 var ResultToLabel = {
   org: "Orginization",
@@ -430,7 +428,7 @@ function reconfirm(testerName, results) {
       table.push({ KEY: ResultToLabel[key], VALUE: `${value}` });
     }
     console.log(
-      `Would you say the following summarizes the Dataset at ${import_chalk8.default.blue(
+      `Would you say the following summarizes the Dataset at ${import_chalk7.default.blue(
         results.url
       )}?`
     );
@@ -462,33 +460,34 @@ function askForName() {
 }
 
 // src/longscrape.ts
+var fs = __toESM(require("fs/promises"));
 var delay = (seconds) => new Promise((res) => setTimeout(res, seconds * 1e3));
 function longScrape(url, priorName) {
   return __async(this, null, function* () {
     console.clear();
     const name = priorName != null ? priorName : yield askForName();
-    console.log(`Loading new ${import_chalk9.default.green("puppeteer")} instance...`);
+    console.log(`Loading new ${import_chalk8.default.green("puppeteer")} instance...`);
     console.log();
     const browser = yield import_puppeteer.default.launch({ headless: "new" });
     console.log(`Opening new page...`);
     console.log();
     const page = yield browser.newPage();
-    console.log(`Setting ${import_chalk9.default.yellow("User-Agent")} header...`);
+    console.log(`Setting ${import_chalk8.default.yellow("User-Agent")} header...`);
     console.log();
     yield page.setUserAgent("datagov-external-client");
-    console.log(`Visiting ${import_chalk9.default.blue(url)}...`);
+    console.log(`Visiting ${import_chalk8.default.blue(url)}...`);
     console.log();
     yield page.goto(url, { waitUntil: "networkidle0" });
-    console.log(`Extracting all easily readable data from ${import_chalk9.default.blue(url)}...`);
+    console.log(`Extracting all easily readable data from ${import_chalk8.default.blue(url)}...`);
     console.log();
-    const data = yield extract(browser, page);
+    const data = yield extract(page);
     console.log();
     console.log(
-      `Opening ${import_chalk9.default.blue(url)} in ${import_chalk9.default.green("Google Chrome")}...`
+      `Opening ${import_chalk8.default.blue(url)} in ${import_chalk8.default.green("Google Chrome")}...`
     );
     yield delay(2);
     yield exec(`google-chrome ${url}`);
-    let results;
+    let results = null;
     let confirmation = false;
     while (!confirmation) {
       console.log();
@@ -498,18 +497,22 @@ function longScrape(url, priorName) {
       if (!confirmation)
         console.clear();
     }
-    console.log("TODO");
+    console.log(`Outputing result to ${import_chalk8.default.grey("output.csv")}...`);
     console.log();
+    yield fs.appendFile(
+      "output.csv",
+      `${results.url},${results.org},${results.name},${results.description.split(",").join("\\,")},${results.resourceCount},${results.latestUpdate},${results.updateRate},${results.updateMethod},${results.yearRangeForComparison},${results.hasAPI},${results.formats.split(",").join("\\,")},${results.areasOfFocus.split(",").join("\\,")},${results.useful},${results.notes},${name}`
+    );
     yield delay(1);
-    console.log(`Closing ${import_chalk9.default.green("puppeteer")} instance...`);
+    console.log(`Closing ${import_chalk8.default.green("puppeteer")} instance...`);
     console.log();
     yield browser.close();
   });
 }
 
 // src/index.ts
-var fs = __toESM(require("fs"));
-var import_chalk10 = __toESM(require("chalk"));
+var fs2 = __toESM(require("fs"));
+var import_chalk9 = __toESM(require("chalk"));
 function main() {
   return __async(this, null, function* () {
     const argv = yield (0, import_yargs.default)(process.argv.slice(2)).command("$0 [url]", "scrape a data.gov.il URL").epilogue(
@@ -519,17 +522,17 @@ function main() {
       longScrape(argv.url);
     } else {
       try {
-        const raw = fs.readFileSync("links.txt", "utf-8");
+        const raw = fs2.readFileSync("links.txt", "utf-8");
         const name = yield askForName();
         console.log();
         for (let line of raw.split("\n")) {
-          console.log("Starting process for " + import_chalk10.default.blue(line));
+          console.log("Starting process for " + import_chalk9.default.blue(line));
           yield longScrape(line, name);
           console.clear();
         }
       } catch (error) {
         console.error(
-          import_chalk10.default.redBright(
+          import_chalk9.default.redBright(
             "If no [url] is provided, the file `links.txt` must exist."
           )
         );

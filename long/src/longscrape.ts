@@ -5,6 +5,7 @@ import { FullResults, input } from "./input";
 import { exec } from "./exec";
 import { reconfirm } from "./input/reconfirm";
 import { askForName } from "./askForName";
+import * as fs from "fs/promises";
 
 const delay = (seconds: number) =>
   new Promise((res) => setTimeout(res, seconds * 1000));
@@ -41,7 +42,7 @@ export async function longScrape(url: string, priorName?: string) {
   await delay(2);
   await exec(`google-chrome ${url}`);
 
-  let results: FullResults;
+  let results: FullResults | null = null;
   let confirmation = false;
 
   while (!confirmation) {
@@ -55,8 +56,16 @@ export async function longScrape(url: string, priorName?: string) {
   }
 
   // do stuff with results
-  console.log("TODO");
+  console.log(`Outputing result to ${chalk.grey("output.csv")}...`);
   console.log();
+  await fs.appendFile(
+    "output.csv",
+    `${results!.url},${results!.org},${results!.name},"${results!.description
+    }",${results!.resourceCount},${results!.latestUpdate},${results!.updateRate
+    },${results!.updateMethod},${results!.yearRangeForComparison},${results!.hasAPI
+    },"${results!.formats}","${results!.areasOfFocus}",${results!.useful},${results!.notes
+    },${name}`
+  );
   await delay(1);
 
   console.log(`Closing ${chalk.green("puppeteer")} instance...`);

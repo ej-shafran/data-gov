@@ -13,6 +13,7 @@ const ResultToMessage = {
   updateRate: "update rate",
   updateMethod: "update method",
   formats: "list of resource formats",
+  resourceCount: "resource count",
 };
 
 export async function confirmAnswers(results: ExtractedResults) {
@@ -36,6 +37,13 @@ export async function confirmAnswers(results: ExtractedResults) {
       message: `Is ${chalk.blue(results.description)} the correct ${ResultToMessage.description
         }?`,
       name: "description",
+    },
+    {
+      type: "confirm",
+      message: `Is the ${chalk.yellow(
+        ResultToMessage.resourceCount
+      )} ${chalk.blue(results.resourceCount)}?`,
+      name: "resourceCount",
     },
     {
       type: "confirm",
