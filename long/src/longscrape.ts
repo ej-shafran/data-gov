@@ -4,6 +4,12 @@ import yargs from "yargs/yargs";
 import chalk from "chalk";
 import puppeteer from "puppeteer";
 
+import { getHeaderText } from "./getHeaderText";
+import { getOrg } from "./getOrg";
+import { getDescription } from "./getDescription";
+import { getUpdateRate } from "./getUpdateRate";
+import { getUpdateMethod } from "./getUpdateMethod";
+
 async function longFetch(url: string, screenshot?: boolean) {
   console.log(`Loading new ${chalk.green("puppeteer")} instance...`);
   const browser = await puppeteer.launch({ headless: "new" });
@@ -22,16 +28,20 @@ async function longFetch(url: string, screenshot?: boolean) {
     await page.screenshot({ path: "temp.png" });
   }
 
-  // console.log("Getting header text:");
-  //
-  // const h1 = await page.$eval("h1", (el) => el.textContent);
-  //
-  // if (!h1) {
-  //   console.error(chalk.redBright("Could not find h1 element on page."));
-  //   return process.exit(1);
-  // }
-  //
-  // console.log(JSON.stringify(h1.trim()));
+  const name = await getHeaderText(page);
+  console.log(`Name: ${chalk.green(name)}`);
+
+  const org = await getOrg(page);
+  console.log(`Org: ${chalk.green(org)}`);
+
+  const desc = await getDescription(page);
+  console.log(`Description: ${chalk.green(desc)}`);
+
+  const updateRate = await getUpdateRate(page);
+  console.log(`Update Rate: ${chalk.green(updateRate)}`);
+
+  const updateMethod = await getUpdateMethod(page);
+  console.log(`Update Method: ${chalk.green(updateMethod)}`);
 
   return process.exit(0);
 }
@@ -41,10 +51,13 @@ const argv = yargs(process.argv.slice(2))
     alias: "url",
     demandOption: true,
     type: "string",
+    desc: "URL to scrape the data from.",
   })
   .option("s", {
     alias: "screenshot",
     type: "boolean",
+    desc: "Whether to take a screenshot of the page.",
+    default: false,
   })
   .parseSync();
 
