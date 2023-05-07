@@ -1,10 +1,10 @@
 {
-  "name": "long",
+  "name": "bin",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "esbuild src/index.ts --outfile=bin --bundle --platform=node --packages=external"
+    "build": "esbuild src/index.ts --outfile=main --bundle --platform=node --packages=external"
   },
   "keywords": [],
   "author": "",
