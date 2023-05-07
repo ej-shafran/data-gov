@@ -4,8 +4,34 @@ var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b ||= {})
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __objRest = (source, exclude) => {
+  var target = {};
+  for (var prop in source)
+    if (__hasOwnProp.call(source, prop) && exclude.indexOf(prop) < 0)
+      target[prop] = source[prop];
+  if (source != null && __getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(source)) {
+      if (exclude.indexOf(prop) < 0 && __propIsEnum.call(source, prop))
+        target[prop] = source[prop];
+    }
+  return target;
+};
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
     for (let key of __getOwnPropNames(from))
@@ -47,7 +73,7 @@ var __async = (__this, __arguments, generator) => {
 var import_yargs = __toESM(require("yargs/yargs"));
 
 // src/longscrape.ts
-var import_chalk7 = __toESM(require("chalk"));
+var import_chalk8 = __toESM(require("chalk"));
 var import_puppeteer = __toESM(require("puppeteer"));
 
 // src/extract/getOrg.ts
@@ -220,37 +246,43 @@ function extract(browser, page) {
   });
 }
 
-// src/input/index.ts
+// src/input/confirmAnswers.ts
 var import_chalk6 = __toESM(require("chalk"));
 var import_inquirer = __toESM(require("inquirer"));
-function input(results) {
+var ResultToMessage = {
+  name: "dataset name",
+  org: "orginization name",
+  description: "description",
+  updateRate: "update rate",
+  updateMethod: "update method",
+  formats: "list of resource formats"
+};
+function confirmAnswers(results) {
   return __async(this, null, function* () {
-    const answers = yield import_inquirer.default.prompt([
+    const confirmAnswers2 = yield import_inquirer.default.prompt([
       {
         type: "confirm",
         message: `Is ${import_chalk6.default.blue(results.name)} the correct ${import_chalk6.default.yellow(
-          "collection name"
+          ResultToMessage.name
         )}?`,
         name: "name"
       },
       {
         type: "confirm",
         message: `Is ${import_chalk6.default.blue(results.org)} the correct ${import_chalk6.default.yellow(
-          "orginization name"
+          ResultToMessage.org
         )}?`,
         name: "org"
       },
       {
         type: "confirm",
-        message: `Is ${import_chalk6.default.blue(
-          results.description
-        )} the correct ${import_chalk6.default.yellow("description")}?`,
+        message: `Is ${import_chalk6.default.blue(results.description)} the correct ${ResultToMessage.description}?`,
         name: "description"
       },
       {
         type: "confirm",
         message: `Is ${import_chalk6.default.blue(results.updateRate)} the correct ${import_chalk6.default.yellow(
-          "update rate"
+          ResultToMessage.updateRate
         )}?`,
         name: "updateRate"
       },
@@ -258,13 +290,13 @@ function input(results) {
         type: "confirm",
         message: `Is ${import_chalk6.default.blue(
           results.updateMethod
-        )} the correct ${import_chalk6.default.yellow("update method")}?`,
+        )} the correct ${import_chalk6.default.yellow(ResultToMessage.updateMethod)}?`,
         name: "updateMethod"
       },
       {
         type: "confirm",
         message: `Is "${import_chalk6.default.blue(results.formats)}" the correct ${import_chalk6.default.yellow(
-          "list of resource formats"
+          ResultToMessage.formats
         )}?`,
         name: "formats"
       },
@@ -276,7 +308,94 @@ function input(results) {
         name: "hasAPI"
       }
     ]);
-    console.log(answers);
+    let questions = [];
+    let final = {};
+    for (let key in confirmAnswers2) {
+      if (confirmAnswers2[key]) {
+        final[key] = results[key];
+      } else if (key === "hasAPI") {
+        final[key] = !confirmAnswers2[key];
+      } else {
+        questions.push({
+          type: "input",
+          name: key,
+          message: `Please enter the ${import_chalk6.default.yellow(
+            ResultToMessage[key]
+          )}:`,
+          validate(input2) {
+            return !!input2 || "REQUIRED";
+          }
+        });
+      }
+    }
+    const rest = yield import_inquirer.default.prompt(questions);
+    rest.hasAPI = rest.hasAPI ? "\u05D9\u05E9" : "\u05D0\u05D9\u05DF";
+    return __spreadValues(__spreadValues({}, final), rest);
+  });
+}
+
+// src/input/inputAnswers.ts
+var import_chalk7 = __toESM(require("chalk"));
+var import_inquirer2 = __toESM(require("inquirer"));
+function inputAnswers() {
+  return __async(this, null, function* () {
+    const _a = yield import_inquirer2.default.prompt([
+      {
+        type: "checkbox",
+        choices: ["\u05D7\u05D9\u05E0\u05D5\u05DA", "\u05EA\u05E2\u05E1\u05D5\u05E7\u05D4", "\u05D9\u05D5\u05E7\u05E8 \u05D4\u05DE\u05D7\u05D9\u05D4", "\u05D0\u05D9\u05DB\u05D5\u05EA \u05D4\u05E1\u05D1\u05D9\u05D1\u05D4"],
+        name: "areasOfFocus",
+        message: `Which of these ${import_chalk7.default.yellow("areas of focus")} apply?`
+      },
+      {
+        type: "input",
+        message: `What is the ${import_chalk7.default.yellow(
+          "latest update"
+        )}? (Be sure to check the actual files)`,
+        name: "latestUpdate",
+        validate(input2) {
+          return !!input2 || "REQUIRED";
+        }
+      },
+      {
+        type: "input",
+        message: `What is the ${import_chalk7.default.yellow("relevant year range")}?`,
+        name: "yearRangeForComparison",
+        validate(input2) {
+          return !!input2 || "REQUIRED";
+        }
+      },
+      {
+        type: "confirm",
+        message: `Is this dataset ${import_chalk7.default.yellow("useful")}?`,
+        name: "useful"
+      },
+      {
+        type: "input",
+        message: "Additional notes:",
+        name: "notes"
+      },
+      {
+        type: "input",
+        message: "Please enter your name:",
+        name: "testerName",
+        validate(input2) {
+          return !!input2 || "REQUIRED";
+        }
+      }
+    ]), { useful, areasOfFocus } = _a, answers = __objRest(_a, ["useful", "areasOfFocus"]);
+    return __spreadValues({
+      useful: useful ? "\u05E9\u05D9\u05DE\u05D5\u05E9\u05D9" : "\u05DC\u05D0 \u05E9\u05D9\u05DE\u05D5\u05E9\u05D9",
+      areasOfFocus: areasOfFocus.join(",")
+    }, answers);
+  });
+}
+
+// src/input/index.ts
+function input(data) {
+  return __async(this, null, function* () {
+    const confirmed = yield confirmAnswers(data);
+    const userInput = yield inputAnswers();
+    return __spreadValues(__spreadValues({}, confirmed), userInput);
   });
 }
 
@@ -286,26 +405,33 @@ var import_util = require("util");
 var exec = (0, import_util.promisify)(import_child_process.exec);
 
 // src/longscrape.ts
+var delay = (seconds) => new Promise((res) => setTimeout(res, seconds * 1e3));
 function longFetch(url) {
   return __async(this, null, function* () {
-    console.log(`Loading new ${import_chalk7.default.green("puppeteer")} instance...`);
+    console.log(`Loading new ${import_chalk8.default.green("puppeteer")} instance...`);
     console.log();
     const browser = yield import_puppeteer.default.launch({ headless: "new" });
     console.log(`Opening new page...`);
     console.log();
     const page = yield browser.newPage();
-    console.log(`Setting ${import_chalk7.default.yellow("User-Agent")} header...`);
+    console.log(`Setting ${import_chalk8.default.yellow("User-Agent")} header...`);
     console.log();
     yield page.setUserAgent("datagov-external-client");
-    console.log(`Visiting ${import_chalk7.default.blue(url)}...`);
+    console.log(`Visiting ${import_chalk8.default.blue(url)}...`);
     console.log();
     yield page.goto(url, { waitUntil: "networkidle0" });
-    console.log(`Extracting all easily readable data from ${import_chalk7.default.blue(url)}...`);
+    console.log(`Extracting all easily readable data from ${import_chalk8.default.blue(url)}...`);
     console.log();
     const data = yield extract(browser, page);
+    console.log(
+      `Opening ${import_chalk8.default.blue(url)} in ${import_chalk8.default.green("Google Chrome")}...`
+    );
+    yield delay(2);
     yield exec(`google-chrome ${url}`);
     console.log();
-    yield input(data);
+    const results = yield input(data);
+    console.log();
+    console.log(results);
     return process.exit(0);
   });
 }

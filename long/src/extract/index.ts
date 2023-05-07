@@ -20,15 +20,6 @@ export type ExtractedResults = {
   hasAPI: "יש" | "אין";
 };
 
-type UserInput = {
-  areasOfFocus: "חינוך" | "תעסוקה" | "יוקר המחיה" | "איכות הסביבה";
-  latestUpdate: string;
-  yearRangeForComparison: string;
-  useful: "שימושי" | "לא שימושי";
-  notes: string;
-  testerName: string;
-};
-
 export async function extract(
   browser: Browser,
   page: Page
