@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import puppeteer from "puppeteer";
+import { extract } from "./extract";
 
 // import { getHeaderText } from "./getHeaderText";
 // import { getOrg } from "./getOrg";
@@ -19,6 +20,10 @@ export async function longFetch(url: string) {
 
   console.log(`Visiting ${chalk.blue(url)}...`);
   await page.goto(url, { waitUntil: "networkidle0" });
+
+  const data = await extract(browser, page);
+
+  console.log(data);
 
   // if (screenshot) {
   //   console.log(`Taking a screenshot...`);

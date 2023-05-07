@@ -47,38 +47,38 @@ var __async = (__this, __arguments, generator) => {
 var import_yargs = __toESM(require("yargs/yargs"));
 
 // src/longscrape.ts
-var import_chalk5 = __toESM(require("chalk"));
+var import_chalk6 = __toESM(require("chalk"));
 var import_puppeteer = __toESM(require("puppeteer"));
 
-// src/getHeaderText.ts
+// src/extract/getOrg.ts
 var import_chalk = __toESM(require("chalk"));
-function getHeaderText(page) {
-  return __async(this, null, function* () {
-    console.log("Getting header text:");
-    const h1 = yield page.$eval("h1", (el) => el.textContent);
-    if (!h1) {
-      console.error(import_chalk.default.redBright("Could not find h1 element on page."));
-      return process.exit(1);
-    }
-    return h1.trim();
-  });
-}
-
-// src/getOrg.ts
-var import_chalk2 = __toESM(require("chalk"));
 function getOrg(page) {
   return __async(this, null, function* () {
     console.log("Getting originization...");
     const org = yield page.$eval(".breadcrumb li:nth-child(2) a", (el) => el.textContent);
     if (!org) {
-      console.error(import_chalk2.default.redBright("Could not find second link in breadcrumb."));
+      console.error(import_chalk.default.redBright("Could not find second link in breadcrumb."));
       return process.exit(1);
     }
     return org.trim();
   });
 }
 
-// src/getDescription.ts
+// src/extract/getHeaderText.ts
+var import_chalk2 = __toESM(require("chalk"));
+function getHeaderText(page) {
+  return __async(this, null, function* () {
+    console.log("Getting header text:");
+    const h1 = yield page.$eval("h1", (el) => el.textContent);
+    if (!h1) {
+      console.error(import_chalk2.default.redBright("Could not find h1 element on page."));
+      return process.exit(1);
+    }
+    return h1.trim();
+  });
+}
+
+// src/extract/getDescription.ts
 function getDescription(page) {
   return __async(this, null, function* () {
     console.log("Getting description...");
@@ -91,8 +91,34 @@ function getDescription(page) {
   });
 }
 
-// src/getUpdateRate.ts
+// src/extract/getResourceCount.ts
+function getResourceCount(page) {
+  return __async(this, null, function* () {
+    console.log("Getting resource count...");
+    const count = yield page.$$eval("ul.resource-list", (els) => els.length);
+    return count;
+  });
+}
+
+// src/extract/getUpdateMethod.ts
 var import_chalk3 = __toESM(require("chalk"));
+function getUpdateMethod(page) {
+  return __async(this, null, function* () {
+    console.log("Getting update method...");
+    const text = yield page.$eval(
+      "tbody tr:nth-child(4) td.dataset-details",
+      (el) => el.textContent
+    );
+    if (!text) {
+      console.error(import_chalk3.default.redBright("Could not find `Update Method` in table."));
+      return process.exit(1);
+    }
+    return text;
+  });
+}
+
+// src/extract/getUpdateRate.ts
+var import_chalk4 = __toESM(require("chalk"));
 function getUpdateRate(page) {
   return __async(this, null, function* () {
     console.log("Getting update rate...");
@@ -102,7 +128,7 @@ function getUpdateRate(page) {
     );
     if (!text) {
       console.error(
-        import_chalk3.default.redBright("Could not find `Update Rate` column in table.")
+        import_chalk4.default.redBright("Could not find `Update Rate` column in table.")
       );
       return process.exit(1);
     }
@@ -110,48 +136,96 @@ function getUpdateRate(page) {
   });
 }
 
-// src/getUpdateMethod.ts
-var import_chalk4 = __toESM(require("chalk"));
-function getUpdateMethod(page) {
+// src/extract/getFormats.ts
+function getFormats(page) {
   return __async(this, null, function* () {
-    console.log("Getting update method...");
-    const text = yield page.$eval(
-      "tbody tr:nth-child(4) td.dataset-details",
-      (el) => el.textContent
+    console.log("Getting formats...");
+    const formatSet = /* @__PURE__ */ new Set();
+    const formats = yield page.$$eval(
+      "[data-format]",
+      (els) => els.map((el) => el.getAttribute("data-format"))
     );
-    if (!text) {
-      console.error(import_chalk4.default.redBright("Could not find `Update Method` in table."));
+    for (let format of formats) {
+      if (format)
+        formatSet.add(format);
+    }
+    return [...formatSet].join(",");
+  });
+}
+
+// src/extract/getApi.ts
+var import_chalk5 = __toESM(require("chalk"));
+function getHasApi(browser, page) {
+  return __async(this, null, function* () {
+    const href = yield page.$eval(
+      ".resource-item a.btn",
+      (el) => el.getAttribute("href")
+    );
+    if (!href) {
+      console.error(import_chalk5.default.redBright("Could not find Eye icon in page."));
       return process.exit(1);
     }
-    return text;
+    const newPage = yield browser.newPage();
+    yield newPage.setUserAgent("datagov-external-client");
+    yield newPage.goto(`https://data.gov.il/${href}`, {
+      waitUntil: "networkidle0"
+    });
+    const apiBtn = yield newPage.$('[data-module="gov-api-info"]');
+    return !!apiBtn ? "\u05D9\u05E9" : "\u05D0\u05D9\u05DF";
+  });
+}
+
+// src/extract/index.ts
+function extract(browser, page) {
+  return __async(this, null, function* () {
+    const [
+      url,
+      org,
+      name,
+      description,
+      resourceCount,
+      updateMethod,
+      updateRate,
+      formats,
+      hasAPI
+    ] = yield Promise.all([
+      page.url(),
+      getOrg(page),
+      getHeaderText(page),
+      getDescription(page),
+      getResourceCount(page),
+      getUpdateMethod(page),
+      getUpdateRate(page),
+      getFormats(page),
+      getHasApi(browser, page)
+    ]);
+    return {
+      url,
+      org,
+      name,
+      description,
+      resourceCount,
+      updateRate,
+      updateMethod,
+      formats,
+      hasAPI
+    };
   });
 }
 
 // src/longscrape.ts
-function longFetch(url, screenshot) {
+function longFetch(url) {
   return __async(this, null, function* () {
-    console.log(`Loading new ${import_chalk5.default.green("puppeteer")} instance...`);
+    console.log(`Loading new ${import_chalk6.default.green("puppeteer")} instance...`);
     const browser = yield import_puppeteer.default.launch({ headless: "new" });
     console.log(`Opening new page...`);
     const page = yield browser.newPage();
-    console.log(`Setting ${import_chalk5.default.yellow("User-Agent")} header...`);
+    console.log(`Setting ${import_chalk6.default.yellow("User-Agent")} header...`);
     yield page.setUserAgent("datagov-external-client");
-    console.log(`Visiting ${import_chalk5.default.blue(url)}...`);
+    console.log(`Visiting ${import_chalk6.default.blue(url)}...`);
     yield page.goto(url, { waitUntil: "networkidle0" });
-    if (screenshot) {
-      console.log(`Taking a screenshot...`);
-      yield page.screenshot({ path: "temp.png" });
-    }
-    const name = yield getHeaderText(page);
-    console.log(`Name: ${import_chalk5.default.green(name)}`);
-    const org = yield getOrg(page);
-    console.log(`Org: ${import_chalk5.default.green(org)}`);
-    const desc = yield getDescription(page);
-    console.log(`Description: ${import_chalk5.default.green(desc)}`);
-    const updateRate = yield getUpdateRate(page);
-    console.log(`Update Rate: ${import_chalk5.default.green(updateRate)}`);
-    const updateMethod = yield getUpdateMethod(page);
-    console.log(`Update Method: ${import_chalk5.default.green(updateMethod)}`);
+    const data = yield extract(browser, page);
+    console.log(data);
     return process.exit(0);
   });
 }
@@ -162,10 +236,5 @@ var argv = (0, import_yargs.default)(process.argv.slice(2)).option("u", {
   demandOption: true,
   type: "string",
   desc: "URL to scrape the data from."
-}).option("s", {
-  alias: "screenshot",
-  type: "boolean",
-  desc: "Whether to take a screenshot of the page.",
-  default: false
 }).parseSync();
-longFetch(argv.u, argv.s);
+longFetch(argv.u);

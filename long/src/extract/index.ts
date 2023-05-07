@@ -1,12 +1,14 @@
-import { Page } from "puppeteer";
+import { Browser, Page } from "puppeteer";
 import { getOrg } from "./getOrg";
 import { getHeaderText } from "./getHeaderText";
 import { getDescription } from "./getDescription";
 import { getResourceCount } from "./getResourceCount";
 import { getUpdateMethod } from "./getUpdateMethod";
 import { getUpdateRate } from "./getUpdateRate";
+import { getFormats } from "./getFormats";
+import { getHasApi } from "./getApi";
 
-export type Results = {
+export type ExtractedResults = {
   url: string;
   org: string;
   name: string;
@@ -16,7 +18,9 @@ export type Results = {
   updateMethod: string;
   formats: string;
   hasAPI: "יש" | "אין";
+};
 
+type UserInput = {
   areasOfFocus: "חינוך" | "תעסוקה" | "יוקר המחיה" | "איכות הסביבה";
   latestUpdate: string;
   yearRangeForComparison: string;
@@ -25,17 +29,31 @@ export type Results = {
   testerName: string;
 };
 
-export async function extract(page: Page): Promise<Results> {
-  const [url, org, name, description, resourceCount, updateMethod, updateRate] =
-    await Promise.all([
-      page.url(),
-      getOrg(page),
-      getHeaderText(page),
-      getDescription(page),
-      getResourceCount(page),
-      getUpdateMethod(page),
-      getUpdateRate(page),
-    ]);
+export async function extract(
+  browser: Browser,
+  page: Page
+): Promise<ExtractedResults> {
+  const [
+    url,
+    org,
+    name,
+    description,
+    resourceCount,
+    updateMethod,
+    updateRate,
+    formats,
+    hasAPI,
+  ] = await Promise.all([
+    page.url(),
+    getOrg(page),
+    getHeaderText(page),
+    getDescription(page),
+    getResourceCount(page),
+    getUpdateMethod(page),
+    getUpdateRate(page),
+    getFormats(page),
+    getHasApi(browser, page),
+  ]);
 
   return {
     url,
@@ -45,5 +63,7 @@ export async function extract(page: Page): Promise<Results> {
     resourceCount,
     updateRate,
     updateMethod,
-  } as any;
+    formats,
+    hasAPI,
+  };
 }
