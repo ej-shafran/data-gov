@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "esbuild src/longscrape.ts --outfile=bin.js --bundle --platform=node --packages=external"
+    "build": "esbuild src/longscrape.ts --outfile=bin --bundle --platform=node --packages=external"
   },
   "keywords": [],
   "author": "",
