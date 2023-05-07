@@ -47,7 +47,7 @@ var __async = (__this, __arguments, generator) => {
 var import_yargs = __toESM(require("yargs/yargs"));
 
 // src/longscrape.ts
-var import_chalk6 = __toESM(require("chalk"));
+var import_chalk7 = __toESM(require("chalk"));
 var import_puppeteer = __toESM(require("puppeteer"));
 
 // src/extract/getOrg.ts
@@ -55,7 +55,10 @@ var import_chalk = __toESM(require("chalk"));
 function getOrg(page) {
   return __async(this, null, function* () {
     console.log("Getting originization...");
-    const org = yield page.$eval(".breadcrumb li:nth-child(2) a", (el) => el.textContent);
+    const org = yield page.$eval(
+      ".breadcrumb li:nth-child(2) a",
+      (el) => el.textContent
+    );
     if (!org) {
       console.error(import_chalk.default.redBright("Could not find second link in breadcrumb."));
       return process.exit(1);
@@ -82,7 +85,10 @@ function getHeaderText(page) {
 function getDescription(page) {
   return __async(this, null, function* () {
     console.log("Getting description...");
-    const desc = yield page.$eval(".notes.embedded-content", (el) => el.textContent);
+    const desc = yield page.$eval(
+      ".notes.embedded-content",
+      (el) => el.textContent
+    );
     if (!desc) {
       console.error("Could not find `.notes.embedded-content`.");
       return process.exit(1);
@@ -157,6 +163,7 @@ function getFormats(page) {
 var import_chalk5 = __toESM(require("chalk"));
 function getHasApi(browser, page) {
   return __async(this, null, function* () {
+    console.log("Checking whether there's an API...");
     const href = yield page.$eval(
       ".resource-item a.btn",
       (el) => el.getAttribute("href")
@@ -213,19 +220,84 @@ function extract(browser, page) {
   });
 }
 
+// src/input/index.ts
+var import_chalk6 = __toESM(require("chalk"));
+var import_inquirer = __toESM(require("inquirer"));
+function input(results) {
+  return __async(this, null, function* () {
+    const answers = yield import_inquirer.default.prompt([
+      {
+        type: "confirm",
+        message: `Is ${import_chalk6.default.blue(results.name)} the correct ${import_chalk6.default.yellow(
+          "collection name"
+        )}?`,
+        name: "name"
+      },
+      {
+        type: "confirm",
+        message: `Is ${import_chalk6.default.blue(results.org)} the correct ${import_chalk6.default.yellow(
+          "orginization name"
+        )}?`,
+        name: "org"
+      },
+      {
+        type: "confirm",
+        message: `Is ${import_chalk6.default.blue(
+          results.description
+        )} the correct ${import_chalk6.default.yellow("description")}?`,
+        name: "description"
+      },
+      {
+        type: "confirm",
+        message: `Is ${import_chalk6.default.blue(results.updateRate)} the correct ${import_chalk6.default.yellow(
+          "update rate"
+        )}?`,
+        name: "updateRate"
+      },
+      {
+        type: "confirm",
+        message: `Is ${import_chalk6.default.blue(
+          results.updateMethod
+        )} the correct ${import_chalk6.default.yellow("update method")}?`,
+        name: "updateMethod"
+      },
+      {
+        type: "confirm",
+        message: `Is "${import_chalk6.default.blue(results.formats)}" the correct ${import_chalk6.default.yellow(
+          "list of resource formats"
+        )}?`,
+        name: "formats"
+      },
+      {
+        type: "confirm",
+        message: `Is ${import_chalk6.default.blue(
+          results.hasAPI
+        )} the correct answer to "Has API?"`,
+        name: "hasAPI"
+      }
+    ]);
+    console.log(answers);
+  });
+}
+
 // src/longscrape.ts
 function longFetch(url) {
   return __async(this, null, function* () {
-    console.log(`Loading new ${import_chalk6.default.green("puppeteer")} instance...`);
+    console.log(`Loading new ${import_chalk7.default.green("puppeteer")} instance...`);
+    console.log();
     const browser = yield import_puppeteer.default.launch({ headless: "new" });
     console.log(`Opening new page...`);
+    console.log();
     const page = yield browser.newPage();
-    console.log(`Setting ${import_chalk6.default.yellow("User-Agent")} header...`);
+    console.log(`Setting ${import_chalk7.default.yellow("User-Agent")} header...`);
+    console.log();
     yield page.setUserAgent("datagov-external-client");
-    console.log(`Visiting ${import_chalk6.default.blue(url)}...`);
+    console.log(`Visiting ${import_chalk7.default.blue(url)}...`);
+    console.log();
     yield page.goto(url, { waitUntil: "networkidle0" });
+    console.log(`Extracting all easily readable data from ${import_chalk7.default.blue(url)}...`);
     const data = yield extract(browser, page);
-    console.log(data);
+    yield input(data);
     return process.exit(0);
   });
 }
