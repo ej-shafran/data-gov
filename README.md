@@ -20,6 +20,17 @@ Then, while in the `bin` directory, you can run the script by calling `main`:
 
 Which will scrape that URL and prompt you to confirm the data and fill in the gaps.
 
-If you're lazy (like me! :smile_cat:), you can put all of the links you want to go through into `bin/links.txt`, and then `main` will read them line-by-line and scrape each link for you.
+If you're lazy (like me! :smile_cat:), you can put all of the links you want to go through into `bin/links.txt`, and then `main` will read them line-by-line and scrape each link for you:
 
+`links.txt`:
 
+```
+https://data.gov.il/<SOME DATASET>
+https://data.gov.il/<ANOTHER DATASET>
+```
+
+Etc, then just run:
+
+```bash
+./main
+```
