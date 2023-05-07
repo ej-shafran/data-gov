@@ -7,7 +7,6 @@ type UserInput = {
   yearRangeForComparison: string;
   useful: "שימושי" | "לא שימושי";
   notes: string;
-  testerName: string;
 };
 
 type RawInput = Omit<UserInput, "useful" | "areasOfFocus"> & {
@@ -50,14 +49,6 @@ export async function inputAnswers(): Promise<UserInput> {
       type: "input",
       message: "Additional notes:",
       name: "notes",
-    },
-    {
-      type: "input",
-      message: "Please enter your name:",
-      name: "testerName",
-      validate(input) {
-        return !!input || "REQUIRED";
-      },
     },
   ]);
 

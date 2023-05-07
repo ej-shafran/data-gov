@@ -1,13 +1,19 @@
 import chalk from "chalk";
 import puppeteer from "puppeteer";
 import { extract } from "./extract";
-import { input } from "./input";
+import { FullResults, input } from "./input";
 import { exec } from "./exec";
+import { reconfirm } from "./input/reconfirm";
+import { askForName } from "./askForName";
 
 const delay = (seconds: number) =>
   new Promise((res) => setTimeout(res, seconds * 1000));
 
-export async function longFetch(url: string) {
+export async function longScrape(url: string, priorName?: string) {
+  console.clear();
+
+  const name = priorName ?? (await askForName());
+
   console.log(`Loading new ${chalk.green("puppeteer")} instance...`);
   console.log();
   const browser = await puppeteer.launch({ headless: "new" });
@@ -26,7 +32,8 @@ export async function longFetch(url: string) {
 
   console.log(`Extracting all easily readable data from ${chalk.blue(url)}...`);
   console.log();
-  const data = await extract(browser, page);
+  const data = await extract(page);
+  console.log();
 
   console.log(
     `Opening ${chalk.blue(url)} in ${chalk.green("Google Chrome")}...`
@@ -34,11 +41,25 @@ export async function longFetch(url: string) {
   await delay(2);
   await exec(`google-chrome ${url}`);
 
-  console.log();
-  const results = await input(data);
+  let results: FullResults;
+  let confirmation = false;
 
-  console.log();
-  console.log(results);
+  while (!confirmation) {
+    console.log();
+    results = await input(data);
 
-  return process.exit(0);
+    console.log();
+    confirmation = await reconfirm(name, results);
+
+    if (!confirmation) console.clear();
+  }
+
+  // do stuff with results
+  console.log("TODO");
+  console.log();
+  await delay(1);
+
+  console.log(`Closing ${chalk.green("puppeteer")} instance...`);
+  console.log();
+  await browser.close();
 }

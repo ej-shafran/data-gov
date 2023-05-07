@@ -2,7 +2,9 @@
 "use strict";
 var __create = Object.create;
 var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getOwnPropSymbols = Object.getOwnPropertySymbols;
 var __getProtoOf = Object.getPrototypeOf;
@@ -20,6 +22,7 @@ var __spreadValues = (a, b) => {
     }
   return a;
 };
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
 var __objRest = (source, exclude) => {
   var target = {};
   for (var prop in source)
@@ -73,7 +76,7 @@ var __async = (__this, __arguments, generator) => {
 var import_yargs = __toESM(require("yargs/yargs"));
 
 // src/longscrape.ts
-var import_chalk8 = __toESM(require("chalk"));
+var import_chalk9 = __toESM(require("chalk"));
 var import_puppeteer = __toESM(require("puppeteer"));
 
 // src/extract/getOrg.ts
@@ -329,7 +332,7 @@ function confirmAnswers(results) {
       }
     }
     const rest = yield import_inquirer.default.prompt(questions);
-    rest.hasAPI = rest.hasAPI ? "\u05D9\u05E9" : "\u05D0\u05D9\u05DF";
+    rest.hasAPI = !rest.hasAPI ? "\u05D9\u05E9" : "\u05D0\u05D9\u05DF";
     return __spreadValues(__spreadValues({}, final), rest);
   });
 }
@@ -373,14 +376,6 @@ function inputAnswers() {
         type: "input",
         message: "Additional notes:",
         name: "notes"
-      },
-      {
-        type: "input",
-        message: "Please enter your name:",
-        name: "testerName",
-        validate(input2) {
-          return !!input2 || "REQUIRED";
-        }
       }
     ]), { useful, areasOfFocus } = _a, answers = __objRest(_a, ["useful", "areasOfFocus"]);
     return __spreadValues({
@@ -395,7 +390,9 @@ function input(data) {
   return __async(this, null, function* () {
     const confirmed = yield confirmAnswers(data);
     const userInput = yield inputAnswers();
-    return __spreadValues(__spreadValues({}, confirmed), userInput);
+    return __spreadProps(__spreadValues(__spreadValues({}, confirmed), userInput), {
+      url: data.url
+    });
   });
 }
 
@@ -404,43 +401,140 @@ var import_child_process = require("child_process");
 var import_util = require("util");
 var exec = (0, import_util.promisify)(import_child_process.exec);
 
+// src/input/reconfirm.ts
+var import_as_table = __toESM(require("as-table"));
+var import_chalk8 = __toESM(require("chalk"));
+var import_inquirer3 = __toESM(require("inquirer"));
+var ResultToLabel = {
+  org: "Orginization",
+  name: "Dataset Name",
+  description: "Description",
+  resourceCount: "Resource Count",
+  updateRate: "Update Rate",
+  updateMethod: "Update Method",
+  formats: "Resource Formats",
+  hasAPI: "Has an API?",
+  areasOfFocus: "Areas of Focus",
+  latestUpdate: "Latest Update",
+  yearRangeForComparison: "Year Range",
+  useful: "Useful",
+  notes: "Notes"
+};
+function reconfirm(testerName, results) {
+  return __async(this, null, function* () {
+    const table = [];
+    for (let [_key, value] of Object.entries(results)) {
+      let key = _key;
+      if (key === "url")
+        continue;
+      table.push({ KEY: ResultToLabel[key], VALUE: `${value}` });
+    }
+    console.log(
+      `Would you say the following summarizes the Dataset at ${import_chalk8.default.blue(
+        results.url
+      )}?`
+    );
+    console.log();
+    console.log("Name: " + testerName);
+    console.log();
+    console.log((0, import_as_table.default)(table));
+    console.log();
+    const { confirmed } = yield import_inquirer3.default.prompt([
+      {
+        name: "confirmed",
+        type: "confirm",
+        message: "Confirm: "
+      }
+    ]);
+    return !!confirmed;
+  });
+}
+
+// src/askForName.ts
+var import_inquirer4 = __toESM(require("inquirer"));
+function askForName() {
+  return __async(this, null, function* () {
+    const { name } = yield import_inquirer4.default.prompt([
+      { message: "Enter your name: ", type: "input", name: "name" }
+    ]);
+    return name;
+  });
+}
+
 // src/longscrape.ts
 var delay = (seconds) => new Promise((res) => setTimeout(res, seconds * 1e3));
-function longFetch(url) {
+function longScrape(url, priorName) {
   return __async(this, null, function* () {
-    console.log(`Loading new ${import_chalk8.default.green("puppeteer")} instance...`);
+    console.clear();
+    const name = priorName != null ? priorName : yield askForName();
+    console.log(`Loading new ${import_chalk9.default.green("puppeteer")} instance...`);
     console.log();
     const browser = yield import_puppeteer.default.launch({ headless: "new" });
     console.log(`Opening new page...`);
     console.log();
     const page = yield browser.newPage();
-    console.log(`Setting ${import_chalk8.default.yellow("User-Agent")} header...`);
+    console.log(`Setting ${import_chalk9.default.yellow("User-Agent")} header...`);
     console.log();
     yield page.setUserAgent("datagov-external-client");
-    console.log(`Visiting ${import_chalk8.default.blue(url)}...`);
+    console.log(`Visiting ${import_chalk9.default.blue(url)}...`);
     console.log();
     yield page.goto(url, { waitUntil: "networkidle0" });
-    console.log(`Extracting all easily readable data from ${import_chalk8.default.blue(url)}...`);
+    console.log(`Extracting all easily readable data from ${import_chalk9.default.blue(url)}...`);
     console.log();
     const data = yield extract(browser, page);
+    console.log();
     console.log(
-      `Opening ${import_chalk8.default.blue(url)} in ${import_chalk8.default.green("Google Chrome")}...`
+      `Opening ${import_chalk9.default.blue(url)} in ${import_chalk9.default.green("Google Chrome")}...`
     );
     yield delay(2);
     yield exec(`google-chrome ${url}`);
+    let results;
+    let confirmation = false;
+    while (!confirmation) {
+      console.log();
+      results = yield input(data);
+      console.log();
+      confirmation = yield reconfirm(name, results);
+      if (!confirmation)
+        console.clear();
+    }
+    console.log("TODO");
     console.log();
-    const results = yield input(data);
+    yield delay(1);
+    console.log(`Closing ${import_chalk9.default.green("puppeteer")} instance...`);
     console.log();
-    console.log(results);
-    return process.exit(0);
+    yield browser.close();
   });
 }
 
 // src/index.ts
-var argv = (0, import_yargs.default)(process.argv.slice(2)).option("u", {
-  alias: "url",
-  demandOption: true,
-  type: "string",
-  desc: "URL to scrape the data from."
-}).parseSync();
-longFetch(argv.u);
+var fs = __toESM(require("fs"));
+var import_chalk10 = __toESM(require("chalk"));
+function main() {
+  return __async(this, null, function* () {
+    const argv = yield (0, import_yargs.default)(process.argv.slice(2)).command("$0 [url]", "scrape a data.gov.il URL").epilogue(
+      "If no [url] is provided, the command reads the links from `links.txt` and loops over them."
+    ).help().parseAsync();
+    if (argv.url) {
+      longScrape(argv.url);
+    } else {
+      try {
+        const raw = fs.readFileSync("links.txt", "utf-8");
+        const name = yield askForName();
+        console.log();
+        for (let line of raw.split("\n")) {
+          console.log("Starting process for " + import_chalk10.default.blue(line));
+          yield longScrape(line, name);
+          console.clear();
+        }
+      } catch (error) {
+        console.error(
+          import_chalk10.default.redBright(
+            "If no [url] is provided, the file `links.txt` must exist."
+          )
+        );
+      }
+    }
+  });
+}
+main();

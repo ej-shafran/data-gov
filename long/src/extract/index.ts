@@ -21,7 +21,6 @@ export type ExtractedResults = {
 };
 
 export async function extract(
-  browser: Browser,
   page: Page
 ): Promise<ExtractedResults> {
   const [
@@ -43,7 +42,7 @@ export async function extract(
     getUpdateMethod(page),
     getUpdateRate(page),
     getFormats(page),
-    getHasApi(browser, page),
+    getHasApi(page),
   ]);
 
   return {

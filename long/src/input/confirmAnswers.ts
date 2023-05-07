@@ -89,7 +89,7 @@ export async function confirmAnswers(results: ExtractedResults) {
   }
 
   const rest = await inquirer.prompt(questions);
-  rest.hasAPI = rest.hasAPI ? "יש" : "אין";
+  rest.hasAPI = !rest.hasAPI ? "יש" : "אין";
 
   return {
     ...final,
