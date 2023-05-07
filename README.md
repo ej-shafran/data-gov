@@ -34,3 +34,16 @@ Etc, then just run:
 ```bash
 ./main
 ```
+
+## Exporting the Data
+
+The data is saved to `bin/output.csv`. To import it into Google Sheets, do the following:
+
+1) Go into your sheet within the spreadsheet, and delete the empty rows you're going to be replacing (the ones with your URLs).
+2) Click on `File -> Import` and go to the `Upload` tab.
+3) Upload `bin/output.csv`
+4) For `Import location`, pick `Append to current sheet`
+5) For `Seperator type`, pick `Comma`
+6) Click on `Import Data`
+7) TADA!
+
