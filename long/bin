@@ -130,7 +130,10 @@ function getDescription(page) {
 function getResourceCount(page) {
   return __async(this, null, function* () {
     console.log("Getting resource count...");
-    const count = yield page.$$eval("ul.resource-list", (els) => els.length);
+    const count = yield page.$$eval(
+      "ul.resource-list li.resource-item",
+      (els) => els.length
+    );
     return count;
   });
 }
@@ -501,7 +504,7 @@ function longScrape(url, priorName) {
     console.log();
     yield fs.appendFile(
       "output.csv",
-      `${results.url},${results.org},${results.name},${results.description.split(",").join("\\,")},${results.resourceCount},${results.latestUpdate},${results.updateRate},${results.updateMethod},${results.yearRangeForComparison},${results.hasAPI},${results.formats.split(",").join("\\,")},${results.areasOfFocus.split(",").join("\\,")},${results.useful},${results.notes},${name}`
+      `${results.url},${results.org},${results.name},"${results.description}",${results.resourceCount},${results.latestUpdate},${results.updateRate},${results.updateMethod},${results.yearRangeForComparison},${results.hasAPI},"${results.formats}","${results.areasOfFocus}",${results.useful},${results.notes},${name}`.split("\n").join("	") + "\n"
     );
     yield delay(1);
     console.log(`Closing ${import_chalk8.default.green("puppeteer")} instance...`);
@@ -525,7 +528,7 @@ function main() {
         const raw = fs2.readFileSync("links.txt", "utf-8");
         const name = yield askForName();
         console.log();
-        for (let line of raw.split("\n")) {
+        for (let line of raw.split("\n").filter(Boolean)) {
           console.log("Starting process for " + import_chalk9.default.blue(line));
           yield longScrape(line, name);
           console.clear();

@@ -56,19 +56,24 @@ export async function longScrape(url: string, priorName?: string) {
   }
 
   // do stuff with results
+  console.clear();
   console.log(`Outputing result to ${chalk.grey("output.csv")}...`);
   console.log();
   await fs.appendFile(
     "output.csv",
     `${results!.url},${results!.org},${results!.name},"${results!.description
-    }",${results!.resourceCount},${results!.latestUpdate},${results!.updateRate
-    },${results!.updateMethod},${results!.yearRangeForComparison},${results!.hasAPI
-    },"${results!.formats}","${results!.areasOfFocus}",${results!.useful},${results!.notes
-    },${name}`
+      }",${results!.resourceCount},${results!.latestUpdate},${results!.updateRate
+      },${results!.updateMethod},${results!.yearRangeForComparison},${results!.hasAPI
+      },"${results!.formats}","${results!.areasOfFocus}",${results!.useful},${results!.notes
+      },${name}`
+      .split("\n")
+      .join("\t") + "\n"
   );
-  await delay(1);
+  await delay(2);
 
   console.log(`Closing ${chalk.green("puppeteer")} instance...`);
   console.log();
   await browser.close();
+
+  await delay(1);
 }
