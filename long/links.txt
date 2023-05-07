@@ -1,4 +1,0 @@
-https://data.gov.il/dataset/prvbuildingquirement
-https://data.gov.il/dataset/psychiatric-hospitals-emergency-health-unit
-https://data.gov.il/dataset/publicbuildings
-
