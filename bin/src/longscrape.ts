@@ -47,7 +47,6 @@ export async function longScrape(url: string, priorName?: string) {
   );
   await delay(2);
   await exec(`google-chrome ${url}`);
-
   let results: FullResults | null = null;
   let confirmation = false;
 
@@ -67,12 +66,12 @@ export async function longScrape(url: string, priorName?: string) {
   console.log();
   await fs.appendFile(
     "output.csv",
-    `${results!.url},${results!.org},${results!.name},"${results!.description
+    `${results!.url},${results!.org.split('"').join('\\"')},${results!.name
       .split('"')
-      .join('\\"')}",${results!.resourceCount},${results!.latestUpdate},${results!.updateRate
-      },${results!.updateMethod},${results!.yearRangeForComparison},${results!.hasAPI
-      },"${results!.formats}","${results!.areasOfFocus}",${results!.useful},${results!.notes
-      },${name}`
+      .join('\\"')},"${results!.description.split('"').join('\\"')}",${results!.resourceCount
+      },${results!.latestUpdate},${results!.updateRate},${results!.updateMethod
+      },${results!.yearRangeForComparison},${results!.hasAPI},"${results!.formats
+      }","${results!.areasOfFocus}",${results!.useful},${results!.notes},${name}`
       .split("\n")
       .join("\t") + "\n"
   );
