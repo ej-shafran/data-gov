@@ -68,7 +68,8 @@ export async function longScrape(url: string, priorName?: string) {
   await fs.appendFile(
     "output.csv",
     `${results!.url},${results!.org},${results!.name},"${results!.description
-      }",${results!.resourceCount},${results!.latestUpdate},${results!.updateRate
+      .split('"')
+      .join('\\"')}",${results!.resourceCount},${results!.latestUpdate},${results!.updateRate
       },${results!.updateMethod},${results!.yearRangeForComparison},${results!.hasAPI
       },"${results!.formats}","${results!.areasOfFocus}",${results!.useful},${results!.notes
       },${name}`

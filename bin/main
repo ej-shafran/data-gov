@@ -518,7 +518,7 @@ function longScrape(url, priorName) {
     console.log();
     yield fs.appendFile(
       "output.csv",
-      `${results.url},${results.org},${results.name},"${results.description}",${results.resourceCount},${results.latestUpdate},${results.updateRate},${results.updateMethod},${results.yearRangeForComparison},${results.hasAPI},"${results.formats}","${results.areasOfFocus}",${results.useful},${results.notes},${name}`.split("\n").join("	") + "\n"
+      `${results.url},${results.org},${results.name},"${results.description.split('"').join('\\"')}",${results.resourceCount},${results.latestUpdate},${results.updateRate},${results.updateMethod},${results.yearRangeForComparison},${results.hasAPI},"${results.formats}","${results.areasOfFocus}",${results.useful},${results.notes},${name}`.split("\n").join("	") + "\n"
     );
     yield delay(2);
     console.log(import_chalk12.default.bold(`Closing ${import_chalk12.default.green("puppeteer")} instance...`));
