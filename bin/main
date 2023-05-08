@@ -114,16 +114,17 @@ function getHeaderText(page) {
 var import_chalk3 = __toESM(require("chalk"));
 function getDescription(page) {
   return __async(this, null, function* () {
+    var _a;
     console.log(import_chalk3.default.bold("Getting description..."));
-    const desc = yield page.$eval(
-      ".notes.embedded-content",
-      (el) => el.textContent
-    );
-    if (!desc) {
-      console.error("Could not find `.notes.embedded-content`.");
-      return process.exit(1);
+    try {
+      const desc = yield page.$eval(
+        ".notes.embedded-content",
+        (el) => el.textContent
+      );
+      return (_a = desc == null ? void 0 : desc.trim()) != null ? _a : "";
+    } catch (error) {
+      return "";
     }
-    return desc.trim();
   });
 }
 
